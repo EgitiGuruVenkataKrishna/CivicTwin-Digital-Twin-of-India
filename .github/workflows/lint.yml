@@ -1,0 +1,48 @@
+name: Lint
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  python-lint:
+    name: Ruff (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint backend
+        run: ruff check backend/
+
+      - name: Lint etl
+        run: ruff check etl/
+
+      - name: Lint ml
+        run: ruff check ml/
+
+  frontend-lint:
+    name: ESLint (Frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: npm run lint

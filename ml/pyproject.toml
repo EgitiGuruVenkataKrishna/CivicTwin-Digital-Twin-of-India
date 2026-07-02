@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "civictwin-ml"
+version = "0.1.0"
+description = "CivicTwin ML — Physics-Informed Neural Network (PINN) for urban climate simulation"
+authors = ["CivicTwin Contributors"]
+license = "MIT"
+packages = [{ include = "civictwin_ml" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = "^2.5"
+numpy = "^2.0"
+xarray = "^2024.10"
+rioxarray = "^0.18"
+scikit-learn = "^1.5"
+matplotlib = "^3.9"
+h5py = "^3.12"
+netCDF4 = "^1.7"
+tqdm = "^4.67"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8"
+pytest = "^8.0"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
