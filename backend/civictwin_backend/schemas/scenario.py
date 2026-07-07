@@ -13,7 +13,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-
 INTERVENTION_TYPES = Literal[
     "add_green_space",
     "add_industrial",

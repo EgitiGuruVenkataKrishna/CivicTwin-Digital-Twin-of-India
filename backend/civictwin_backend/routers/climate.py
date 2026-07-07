@@ -9,8 +9,7 @@ Prefix is intentionally empty — ``main.py`` mounts this router under
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
-from typing import Annotated
+from datetime import UTC, date, datetime
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -52,7 +51,7 @@ async def get_snapshot(
         observations=[ClimateObservationOut.model_validate(o) for o in observations],
         count=len(observations),
         bbox=BBox(**bbox_dict),
-        queried_at=datetime.now(timezone.utc),
+        queried_at=datetime.now(UTC),
     )
 
 

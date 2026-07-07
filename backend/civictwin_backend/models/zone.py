@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime
 
 from geoalchemy2 import Geometry
-from sqlalchemy import DateTime, Float, JSON, String, func
+from sqlalchemy import JSON, DateTime, Float, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 

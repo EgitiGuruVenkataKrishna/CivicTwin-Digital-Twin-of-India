@@ -13,8 +13,9 @@ When a scenario is *run*, this service:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
-from typing import Any, Sequence
+from collections.abc import Sequence
+from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -171,13 +172,13 @@ async def run_scenario(
             result_grid={"predictions": predictions},
             uncertainty={"model_version": inference_response.model_version},
             metrics=metrics,
-            computed_at=datetime.now(timezone.utc),
+            computed_at=datetime.now(UTC),
             model_version=inference_response.model_version,
         )
         db.add(scenario_result)
 
         scenario.status = "completed"
-        scenario.updated_at = datetime.now(timezone.utc)
+        scenario.updated_at = datetime.now(UTC)
         await db.commit()
         await db.refresh(scenario_result)
 
@@ -188,7 +189,7 @@ async def run_scenario(
     except Exception as exc:
         logger.exception("Scenario %s inference failed", scenario_id)
         scenario.status = "failed"
-        scenario.updated_at = datetime.now(timezone.utc)
+        scenario.updated_at = datetime.now(UTC)
         await db.commit()
         raise HTTPException(
             status_code=500,

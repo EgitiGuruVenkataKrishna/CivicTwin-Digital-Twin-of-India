@@ -1,8 +1,8 @@
 import os
+
 import torch
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List
 
 app = FastAPI(title="CivicTwin PINN Inference API")
 
@@ -21,37 +21,37 @@ except Exception as e:
     print(f"Error loading model: {e}")
 
 class InferenceRequest(BaseModel):
-    inputs: List[List[float]]
+    inputs: list[list[float]]
 
 class InferenceResponse(BaseModel):
-    predictions: List[List[float]]
-    uncertainty: List[List[float]]
+    predictions: list[list[float]]
+    uncertainty: list[list[float]]
 
 @app.post("/predict", response_model=InferenceResponse)
 def predict(request: InferenceRequest):
     if model is None:
         raise HTTPException(status_code=500, detail="Model is not loaded.")
-        
+
     try:
         # Convert request inputs to tensor of shape [batch_size, 3]
         x_tensor = torch.tensor(request.inputs, dtype=torch.float32)
-        
+
         mc_samples = 5
         predictions = []
-        
+
         # Perform 5 forward passes with dropout active
         with torch.no_grad():
             for _ in range(mc_samples):
                 pred = model(x_tensor)
                 predictions.append(pred)
-                
+
         # Stack shape: [mc_samples, batch_size, 2]
         preds_stack = torch.stack(predictions)
-        
+
         # Calculate mean (prediction) and variance (uncertainty)
         mean_preds = torch.mean(preds_stack, dim=0)
         var_preds = torch.var(preds_stack, dim=0)
-        
+
         return InferenceResponse(
             predictions=mean_preds.tolist(),
             uncertainty=var_preds.tolist()

@@ -13,7 +13,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-
 ZONE_TYPES = Literal[
     "residential",
     "commercial",

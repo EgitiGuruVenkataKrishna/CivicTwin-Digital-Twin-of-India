@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime
-from shapely.geometry import Point
-from geoalchemy2.shape import from_shape
 
 from civictwin_backend.database import async_session
 from civictwin_backend.models.climate import ClimateObservation
+from geoalchemy2.shape import from_shape
+from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 
@@ -19,13 +19,13 @@ async def write_observations(dataset: str, observed_at: datetime, observations: 
                 lat = obs.get("lat")
                 lon = obs.get("lon")
                 properties = obs.get("properties", {})
-                
+
                 if lat is None or lon is None:
                     continue
-                
+
                 point = Point(lon, lat)
                 geom = from_shape(point, srid=4326)
-                
+
                 record = ClimateObservation(
                     dataset=dataset,
                     observed_at=observed_at,
@@ -33,7 +33,7 @@ async def write_observations(dataset: str, observed_at: datetime, observations: 
                     properties=properties
                 )
                 records.append(record)
-                
+
             db.add_all(records)
             await db.commit()
             logger.info(f"Successfully wrote {len(records)} observations for {dataset}.")

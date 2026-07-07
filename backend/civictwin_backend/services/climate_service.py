@@ -7,9 +7,9 @@ using SQLAlchemy + GeoAlchemy2 spatial functions.
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Any, Sequence
+from typing import Any
 
-from geoalchemy2.functions import ST_DWithin, ST_MakeEnvelope, ST_Within
+from geoalchemy2.functions import ST_DWithin, ST_Within
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

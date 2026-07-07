@@ -7,7 +7,6 @@ produce WKT strings suitable for direct use in PostGIS queries.
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 # ── Hyderabad pilot city bounding box (WGS-84) ─────────────────────────

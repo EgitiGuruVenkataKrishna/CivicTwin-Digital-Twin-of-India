@@ -2,12 +2,12 @@ import asyncio
 import logging
 from datetime import datetime
 
-from .gee_fetcher import fetch_gee_data
-from .mosdac_fetcher import fetch_mosdac_data
-from .imd_fetcher import fetch_imd_stations
 from .cpcb_fetcher import fetch_cpcb_aq
-from .grid_fuser import resample_raster_to_grid
 from .db_writer import write_observations
+from .gee_fetcher import fetch_gee_data
+from .grid_fuser import resample_raster_to_grid
+from .imd_fetcher import fetch_imd_stations
+from .mosdac_fetcher import fetch_mosdac_data
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -10,7 +10,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, JSON, String, Text, func
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -52,7 +52,7 @@ class Scenario(Base):
 
     # ── Relationships ────────────────────────────────────────────────────
     zone = relationship("PlanningZone", backref="scenarios", lazy="selectin")
-    results: Mapped[list["ScenarioResult"]] = relationship(
+    results: Mapped[list[ScenarioResult]] = relationship(
         back_populates="scenario",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -82,4 +82,4 @@ class ScenarioResult(Base):
     model_version: Mapped[str | None] = mapped_column(String, nullable=True)
 
     # ── Relationships ────────────────────────────────────────────────────
-    scenario: Mapped["Scenario"] = relationship(back_populates="results")
+    scenario: Mapped[Scenario] = relationship(back_populates="results")
