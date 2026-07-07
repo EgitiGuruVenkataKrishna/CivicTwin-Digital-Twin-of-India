@@ -30,6 +30,7 @@ from civictwin_backend.routers import (
     climate_router,
     inference_router,
     scenarios_router,
+    simulation_router,
     zones_router,
 )
 
@@ -88,6 +89,7 @@ app.include_router(climate_router, prefix="/api/v1/climate", tags=["Climate"])
 app.include_router(zones_router, prefix="/api/v1/zones", tags=["Zones"])
 app.include_router(scenarios_router, prefix="/api/v1/scenarios", tags=["Scenarios"])
 app.include_router(inference_router, prefix="/api/v1/inference", tags=["Inference"])
+app.include_router(simulation_router, prefix="/api/v1/simulation", tags=["Simulation"])
 
 
 # ── Root & health ────────────────────────────────────────────────────────
