@@ -1,51 +1,69 @@
-"""CivicTwin PINN Training Entrypoint.
+import os
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from civictwin_ml.pinn import CivicTwinPINN
+from civictwin_ml.data_loader import get_dataloader
+from civictwin_ml.losses import heat_diffusion_residual, composite_loss
 
-Trains a Physics-Informed Neural Network for urban climate simulation.
-Target city: Hyderabad.
+def train():
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    model = CivicTwinPINN().to(device)
+    optimizer = optim.Adam(model.parameters(), lr=1e-3)
+    dataloader = get_dataloader(batch_size=64, size=1000)
+    mse_criterion = nn.MSELoss()
+    
+    epochs = 10
+    lambda_weight = 0.05
+    
+    model.train()
+    
+    for epoch in range(epochs):
+        epoch_loss = 0.0
+        for inputs, targets in dataloader:
+            inputs = inputs.to(device)
+            targets = targets.to(device)
+            
+            # Split inputs into x, y, t and require gradients for PDE loss
+            x = inputs[:, 0:1].clone().requires_grad_(True)
+            y = inputs[:, 1:2].clone().requires_grad_(True)
+            t = inputs[:, 2:3].clone().requires_grad_(True)
+            
+            # Recombine to pass to model
+            pinn_inputs = torch.cat([x, y, t], dim=1)
+            
+            optimizer.zero_grad()
+            outputs = model(pinn_inputs)
+            
+            # MSE loss against mocked ground truth
+            mse_loss = mse_criterion(outputs, targets)
+            
+            # PDE loss for Temperature (T is the first output)
+            T = outputs[:, 0:1]
+            pde_res = heat_diffusion_residual(T, x, y, t)
+            pde_loss = torch.mean(pde_res**2)
+            
+            # Composite loss
+            loss = composite_loss(mse_loss, pde_loss, lambda_weight)
+            
+            loss.backward()
+            optimizer.step()
+            
+            epoch_loss += loss.item()
+            
+        print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss/len(dataloader):.4f}")
+        
+    # Ensure directory exists before saving model
+    export_dir = os.path.join(os.path.dirname(__file__), '..', 'hf_space', 'model')
+    os.makedirs(export_dir, exist_ok=True)
+    export_path = os.path.join(export_dir, 'pinn_v1.pt')
+    
+    # Export model with TorchScript
+    model.eval()
+    scripted_model = torch.jit.script(model)
+    scripted_model.save(export_path)
+    print(f"Model saved to {export_path}")
 
-Run with:
-    python -m civictwin_ml.train
-
-For Colab, import this module and call main() directly.
-"""
-
-import logging
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
-logger = logging.getLogger(__name__)
-
-
-def main() -> None:
-    """Train the CivicTwin PINN model."""
-    logger.info("=" * 60)
-    logger.info("CivicTwin PINN Training Pipeline")
-    logger.info("Pilot city: Hyderabad")
-    logger.info("=" * 60)
-
-    # ------------------------------------------------------------------
-    # TODO: Implement training pipeline
-    #
-    # Phase 2 — Baseline Model:
-    #   1. Load fused climate data from PostGIS / exported arrays
-    #   2. Build baseline MLP (no physics constraints)
-    #   3. Train with MSE loss on MODIS LST + Landsat LST
-    #   4. Evaluate RMSE / MAE at IMD station locations
-    #
-    # Phase 3 — PINN Upgrade:
-    #   1. Add Fourier Feature Embedding on spatial/temporal inputs
-    #   2. Implement PDE residual losses:
-    #      - 2D heat diffusion:  dT/dt = α ∇²T + S(x,y,t)
-    #      - Surface energy balance: Rn = H + LE + G
-    #      - Advection-diffusion (AQ): dC/dt + u·∇C = D∇²C + E - λC
-    #   3. Composite loss with GradNorm adaptive weighting
-    #   4. Deep Ensemble (5 models) for uncertainty quantification
-    #      OR MC-Dropout for hackathon MVP
-    #   5. Export to TorchScript for HF Spaces deployment
-    # ------------------------------------------------------------------
-
-    logger.info("Training pipeline not yet implemented — scaffold only.")
-    logger.info("Next step: implement data loading from PostGIS exports.")
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    train()
