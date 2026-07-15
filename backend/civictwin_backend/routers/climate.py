@@ -9,6 +9,9 @@ Prefix is intentionally empty — ``main.py`` mounts this router under
 
 from __future__ import annotations
 
+import logging
+import random
+import uuid
 from datetime import UTC, date, datetime
 
 from fastapi import APIRouter, Depends, Query
@@ -27,26 +30,22 @@ from civictwin_backend.utils.geo import HYDERABAD_BBOX
 
 router = APIRouter()
 
-import logging
-import uuid
-import random
-
 logger = logging.getLogger(__name__)
 
 def generate_mock_observations(bbox: dict, dataset: str | None = None, limit: int = 1000) -> list[ClimateObservationOut]:
     """Generate realistic climate observations for Hyderabad bbox."""
     west, east = bbox.get("west", 78.2), bbox.get("east", 78.7)
     south, north = bbox.get("south", 17.2), bbox.get("north", 17.6)
-    
+
     datasets = [dataset] if dataset else ["gee_lst", "mosdac", "imd_stations", "cpcb_aq"]
     observations = []
-    
+
     for ds in datasets:
         # Generate 15 points per dataset for rich map visualization
         for _ in range(15):
             lat = random.uniform(south, north)
             lon = random.uniform(west, east)
-            
+
             if ds == "cpcb_aq":
                 val = random.uniform(60, 140)
                 props = {"aqi": val, "pm25": val * 0.12, "value": val}
@@ -59,7 +58,7 @@ def generate_mock_observations(bbox: dict, dataset: str | None = None, limit: in
             else: # mosdac
                 val = random.uniform(31, 36)
                 props = {"temp_c": val, "value": val}
-                
+
             observations.append(ClimateObservationOut(
                 id=uuid.uuid4(),
                 dataset=ds,

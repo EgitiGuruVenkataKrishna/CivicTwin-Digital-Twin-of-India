@@ -1,0 +1,11 @@
+# Global Ruff Configuration for CivicTwin
+
+line-length = 120
+
+[lint]
+select = ["E", "F", "I", "W", "N"]
+ignore = [
+    "E501",  # Line too long (allow longer lines for mathematical and geospatial coordinates)
+    "N803",  # Argument name should be lowercase (allow scientific notation like T for temperature)
+    "N806",  # Variable name in function should be lowercase (allow derivative notations like dT_dx)
+]

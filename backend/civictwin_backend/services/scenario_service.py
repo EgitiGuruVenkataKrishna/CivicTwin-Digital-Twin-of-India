@@ -23,7 +23,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from civictwin_backend.models import Scenario, ScenarioResult, PlanningZone
+from civictwin_backend.models import PlanningZone, Scenario, ScenarioResult
 from civictwin_backend.schemas.scenario import ScenarioCreate
 from civictwin_backend.services.climate_service import get_snapshot
 from civictwin_backend.services.inference_client import InferenceClient

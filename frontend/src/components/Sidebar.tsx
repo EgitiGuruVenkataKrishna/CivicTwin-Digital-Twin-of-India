@@ -1,10 +1,10 @@
 import React from 'react';
 import { useAppStore } from '../store/appStore';
-import { Settings, Thermometer, CloudRain, Shield, Activity } from 'lucide-react';
+import { Settings, Thermometer, CloudRain, Activity } from 'lucide-react';
 import { runScenario, simulationWs } from '../services/api';
 
 const Sidebar: React.FC = () => {
-  const { params, setParams, interventionType, setInterventionType, setSimulationResults } = useAppStore();
+  const { params, setParams, interventionType, setSimulationResults } = useAppStore();
 
   const handleRunSimulation = async () => {
     try {

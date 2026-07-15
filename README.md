@@ -132,13 +132,18 @@ civictwin/
 *   Node.js 18+
 *   PostgreSQL / Supabase instance (with PostGIS enabled)
 
-### 2. Configure Environment Variables
-Create a `.env` file in the `backend/` directory:
+Create a `.env` file in the `backend/` directory (you can copy `.env.example` from `infra/` or create it manually):
 ```env
-DATABASE_URL=your_postgres_postgis_connection_string
-HF_SPACE_URL=your_huggingface_inference_url
-API_HOST=127.0.0.1
+DATABASE_URL=postgresql://<username>:<password>@<host>:<port>/postgres
+SUPABASE_URL=https://<your-project-id>.supabase.co
+SUPABASE_ANON_KEY=<your-anon-key>
+REDIS_URL=redis://localhost:6379/0
+GEE_SERVICE_ACCOUNT_EMAIL=<your-service-account-email>
+HF_TOKEN=hf_<your-huggingface-token>
+HF_SPACE_URL=https://<your-space-name>.hf.space
+API_HOST=0.0.0.0
 API_PORT=8000
+LOG_LEVEL=INFO
 ```
 
 ### 3. Launch the Backend Server

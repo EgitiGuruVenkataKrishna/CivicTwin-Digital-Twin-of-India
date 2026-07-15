@@ -49,7 +49,7 @@ class ClimateObservationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     @classmethod
-    def from_orm_obj(cls, obj: object) -> "ClimateObservationOut":
+    def from_orm_obj(cls, obj: object) -> ClimateObservationOut:
         """Create from an ORM ClimateObservation, extracting lat/lon from geom."""
         from geoalchemy2.shape import to_shape
         point = to_shape(obj.geom)  # type: ignore[attr-defined]

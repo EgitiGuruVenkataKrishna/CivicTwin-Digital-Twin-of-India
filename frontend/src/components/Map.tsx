@@ -121,7 +121,7 @@ const MapComponent: React.FC = () => {
     }
 
     return list;
-  }, [simulationResults, zonesGeoJson, observations]);
+  }, [simulationResults, zonesGeoJson, observations, zones]);
 
   return (
     <div className="absolute inset-0 w-full h-full z-0">

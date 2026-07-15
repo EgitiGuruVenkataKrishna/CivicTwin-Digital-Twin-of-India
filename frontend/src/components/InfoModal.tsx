@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Users, Lightbulb, Cpu, DollarSign, Award, Layers, Code, Play, Database } from 'lucide-react';
+import { X, Users, Lightbulb, Cpu, DollarSign, Award, Database } from 'lucide-react';
 
 interface InfoModalProps {
   isOpen: boolean;
