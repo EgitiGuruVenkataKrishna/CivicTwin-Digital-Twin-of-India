@@ -87,10 +87,12 @@ async def init_db() -> None:
     # Seed default planning zones and observations if empty
     async with async_session() as session:
         try:
-            from sqlalchemy import select, func
-            from civictwin_backend.models.zone import PlanningZone
+            from datetime import UTC, datetime
+
+            from sqlalchemy import func, select
+
             from civictwin_backend.models.climate import ClimateObservation
-            from datetime import datetime, UTC
+            from civictwin_backend.models.zone import PlanningZone
 
             zone_check = await session.execute(select(PlanningZone).limit(1))
             if zone_check.scalar_one_or_none() is None:

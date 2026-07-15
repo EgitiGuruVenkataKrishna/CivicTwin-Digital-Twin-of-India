@@ -38,7 +38,7 @@ function App() {
     return () => {
       simulationWs.disconnect();
     };
-  }, []);
+  }, [setZones, setObservations]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-slate-950 font-sans text-slate-100 selection:bg-emerald-500/30">

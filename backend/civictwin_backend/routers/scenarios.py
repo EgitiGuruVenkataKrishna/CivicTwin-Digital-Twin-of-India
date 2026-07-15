@@ -114,20 +114,19 @@ async def run_simulation_direct(
     Direct endpoint to run climate digital twin simulation with progress streaming.
     Calculates crop yield impact, water reservoir stress, and drought index using Penman-Monteith logic.
     """
-    from civictwin_backend.models.zone import PlanningZone
-    from civictwin_backend.routers.simulation import manager
     import asyncio
-    import random
-    
+
+    from civictwin_backend.routers.simulation import manager
+
     params = payload.get("parameters", {})
     temp_anomaly = params.get("tempAnomaly", 1.5)
     rainfall_anomaly = params.get("rainfallAnomaly", -10)
     sector_focus = params.get("sectorFocus", "agriculture")
-    
+
     # Base pilot coordinates (Hyderabad)
     center_lon = 78.4867
     center_lat = 17.3850
-    
+
     grid_cells = []
     # Generate 121 gridded cells
     for i in range(-5, 6):
@@ -159,28 +158,28 @@ async def run_simulation_direct(
             crop_yield_target = 8.0 - (rainfall_anomaly - 25) * 0.5 - (temp_anomaly * 0.8)
         else:
             crop_yield_target = (rainfall_anomaly * 0.25) - (temp_anomaly * 0.6)
-            
+
     # 3. Reservoir Water Levels (%)
     # baseline is 75%. Surges with rain, drops with drought/evaporative heat
     reservoir_level_target = max(10.0, min(100.0, 75.0 + (rainfall_anomaly * 0.55) - (temp_anomaly * 2.2)))
-    
+
     # 4. Mean Temperature
     temp_mean_target = 31.5 + temp_anomaly
 
     # Run 5 steps of the simulation (convergence solver animation)
     for step in range(1, 6):
         factor = step / 5.0
-        
+
         current_crop_yield = crop_yield_target * factor
         # Reservoir level converges from baseline of 75% to target
         current_reservoir_level = 75.0 + (reservoir_level_target - 75.0) * factor
         current_temp_mean = 31.5 + (temp_anomaly * factor)
-        
+
         results = []
         for lon, lat in grid_cells:
             dist_to_center = ((lon - center_lon)**2 + (lat - center_lat)**2)**0.5
             spatial_factor = max(0.1, 1.0 - dist_to_center * 22.0)
-            
+
             # Map simulation values to heatmap weights depending on sector focus
             if sector_focus == "agriculture":
                 # Heatmap represents Crop Stress intensity
@@ -198,13 +197,13 @@ async def run_simulation_direct(
                 heat_stress = max(0.0, (temp_anomaly * 2.5 + (100.0 - current_reservoir_level) * 0.1) * spatial_factor)
                 temp_delta = heat_stress
                 aqi_improvement = 0.0
-                
+
             results.append({
                 "position": [lon, lat],
                 "temperatureDelta": temp_delta,
                 "aqiImprovement": aqi_improvement
             })
-            
+
         payload_ws = {
             "type": "simulation_update" if step < 5 else "simulation_complete",
             "results": results,
@@ -215,10 +214,10 @@ async def run_simulation_direct(
                 "tempMean": current_temp_mean
             }
         }
-        
+
         await manager.broadcast_result(payload_ws)
         await asyncio.sleep(0.3)
-        
+
     return {
         "status": "completed",
         "metrics": {

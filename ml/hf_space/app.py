@@ -38,7 +38,7 @@ def predict(request: InferenceRequest):
 
     try:
         start_time = time.time()
-        
+
         # Parse grid inputs to tensor
         inputs = []
         for cell in request.grid_data:
@@ -46,7 +46,7 @@ def predict(request: InferenceRequest):
             lon = cell.get("lon", 0.0)
             # Pass lat, lon, and default t=0.5
             inputs.append([lat, lon, 0.5])
-            
+
         if not inputs:
             # Default fallback if empty input
             inputs = [[17.3850, 78.4867, 0.5]]
@@ -74,16 +74,16 @@ def predict(request: InferenceRequest):
         for idx, cell in enumerate(request.grid_data):
             pred_temp = mean_preds[idx, 0].item()
             pred_aqi = mean_preds[idx, 1].item()
-            
+
             # Map predictions to realistic range
             temp_val = 20.0 + pred_temp * 20.0
             aqi_val = 30.0 + pred_aqi * 300.0
-            
+
             # Confidence based on variance
             var_temp = var_preds[idx, 0].item()
             var_aqi = var_preds[idx, 1].item()
             confidence = max(0.1, min(0.99, 1.0 - (var_temp + var_aqi) / 2.0))
-            
+
             predictions_out.append({
                 "lat": cell.get("lat", 17.3850),
                 "lon": cell.get("lon", 78.4867),

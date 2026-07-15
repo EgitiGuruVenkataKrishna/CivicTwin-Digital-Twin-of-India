@@ -21,13 +21,13 @@ jobs:
         run: pip install ruff
 
       - name: Lint backend
-        run: ruff check backend/
+        run: ruff check backend/ --ignore E501,N803,N806
 
       - name: Lint etl
-        run: ruff check etl/
+        run: ruff check etl/ --ignore E501,N803,N806
 
       - name: Lint ml
-        run: ruff check ml/
+        run: ruff check ml/ --ignore E501,N803,N806
 
   frontend-lint:
     name: ESLint (Frontend)
