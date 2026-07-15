@@ -1,7 +1,21 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
-const WS_BASE_URL = 'ws://localhost:8000/api/v1';
+const getBaseUrl = () => {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const backendHost = isLocal ? `${window.location.hostname}:8000` : window.location.host;
+  const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
+  return `${protocol}://${backendHost}/api/v1`;
+};
+
+const getWsUrl = () => {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const backendHost = isLocal ? `${window.location.hostname}:8000` : window.location.host;
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${wsProtocol}://${backendHost}/api/v1`;
+};
+
+const API_BASE_URL = getBaseUrl();
+const WS_BASE_URL = getWsUrl();
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -18,6 +32,10 @@ export const runScenario = async (payload: any) => {
 export class SimulationWebSocket {
   private ws: WebSocket | null = null;
   private onMessageCallback: ((data: any) => void) | null = null;
+
+  isConnected(): boolean {
+    return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+  }
 
   connect() {
     this.ws = new WebSocket(`${WS_BASE_URL}/simulation/ws`);

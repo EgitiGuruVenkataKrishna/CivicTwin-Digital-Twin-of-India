@@ -6,7 +6,7 @@ using SQLAlchemy + GeoAlchemy2 spatial functions.
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Any
 
 from geoalchemy2.functions import ST_DWithin, ST_Within
@@ -38,7 +38,7 @@ async def get_snapshot(
 
     stmt = (
         select(ClimateObservation)
-        .where(ST_Within(ClimateObservation.geometry, envelope))
+        .where(ST_Within(ClimateObservation.geom, envelope))
     )
 
     if dataset:
@@ -68,10 +68,10 @@ async def get_timeseries(
     stmt = (
         select(ClimateObservation)
         .where(
-            ST_DWithin(ClimateObservation.geometry, point, 0.005),
+            ST_DWithin(ClimateObservation.geom, point, 0.005),
             ClimateObservation.dataset == dataset,
-            ClimateObservation.observed_at >= datetime.combine(start_date, datetime.min.time()),
-            ClimateObservation.observed_at <= datetime.combine(end_date, datetime.max.time()),
+            ClimateObservation.observed_at >= datetime.combine(start_date, time.min),
+            ClimateObservation.observed_at <= datetime.combine(end_date, time.max),
         )
         .order_by(ClimateObservation.observed_at.asc())
     )
@@ -103,7 +103,7 @@ async def get_latest_by_dataset(
 
     stmt = (
         select(ClimateObservation)
-        .where(ST_Within(ClimateObservation.geometry, envelope))
+        .where(ST_Within(ClimateObservation.geom, envelope))
         .distinct(ClimateObservation.dataset)
         .order_by(ClimateObservation.dataset, ClimateObservation.observed_at.desc())
     )

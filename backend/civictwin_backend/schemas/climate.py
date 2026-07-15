@@ -48,6 +48,21 @@ class ClimateObservationOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @classmethod
+    def from_orm_obj(cls, obj: object) -> "ClimateObservationOut":
+        """Create from an ORM ClimateObservation, extracting lat/lon from geom."""
+        from geoalchemy2.shape import to_shape
+        point = to_shape(obj.geom)  # type: ignore[attr-defined]
+        return cls(
+            id=obj.id,  # type: ignore[attr-defined]
+            dataset=obj.dataset,  # type: ignore[attr-defined]
+            observed_at=obj.observed_at,  # type: ignore[attr-defined]
+            lat=point.y,
+            lon=point.x,
+            properties=obj.properties or {},  # type: ignore[attr-defined]
+            grid_cell_id=obj.grid_cell_id,  # type: ignore[attr-defined]
+        )
+
 
 class ClimateSnapshotResponse(BaseModel):
     """Paginated set of observations within a bounding box."""

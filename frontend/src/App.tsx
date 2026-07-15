@@ -1,14 +1,38 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import MapComponent from './components/Map';
 import Metrics from './components/Metrics';
-import { Layers } from 'lucide-react';
-import { simulationWs } from './services/api';
+import { Layers, Award } from 'lucide-react';
+import { apiClient, simulationWs } from './services/api';
+import { InfoModal } from './components/InfoModal';
+import { useAppStore } from './store/appStore';
 
 function App() {
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const { setZones, setObservations } = useAppStore();
+
   useEffect(() => {
     // Initialize WebSockets on mount
     simulationWs.connect();
+    
+    // Load initial database data
+    const loadInitialData = async () => {
+      try {
+        const zonesResp = await apiClient.get('/zones');
+        setZones(zonesResp.data);
+      } catch (err) {
+        console.warn("Failed to load planning zones:", err);
+      }
+
+      try {
+        const obsResp = await apiClient.get('/climate/snapshot?west=78.2&south=17.2&east=78.7&north=17.6');
+        setObservations(obsResp.data.observations || []);
+      } catch (err) {
+        console.warn("Failed to load climate observations:", err);
+      }
+    };
+    
+    loadInitialData();
     
     // Clean up on unmount
     return () => {
@@ -35,15 +59,27 @@ function App() {
           </span>
         </div>
         
-        <div className="flex items-center gap-3 bg-slate-900/60 border border-slate-700/50 rounded-full px-4 py-1.5 backdrop-blur-md">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-          <span className="text-xs font-bold text-slate-300 tracking-wide uppercase">System Online</span>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setIsInfoOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all shadow-md active:scale-95"
+          >
+            <Award className="w-3.5 h-3.5" /> Project Info
+          </button>
+          
+          <div className="flex items-center gap-3 bg-slate-900/60 border border-slate-700/50 rounded-full px-4 py-1.5 backdrop-blur-md">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+            <span className="text-xs font-bold text-slate-300 tracking-wide uppercase">System Online</span>
+          </div>
         </div>
       </header>
 
       {/* Floating UI Overlay */}
       <Sidebar />
       <Metrics />
+
+      {/* Info Modal Overlay */}
+      <InfoModal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} />
     </div>
   );
 }

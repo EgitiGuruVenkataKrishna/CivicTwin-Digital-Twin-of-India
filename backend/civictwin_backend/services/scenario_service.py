@@ -23,7 +23,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from civictwin_backend.models import Scenario, ScenarioResult, Zone
+from civictwin_backend.models import Scenario, ScenarioResult, PlanningZone
 from civictwin_backend.schemas.scenario import ScenarioCreate
 from civictwin_backend.services.climate_service import get_snapshot
 from civictwin_backend.services.inference_client import InferenceClient
@@ -110,38 +110,35 @@ async def run_scenario(
 
     # Load related zone for spatial context
     zone_result = await db.execute(
-        select(Zone).where(Zone.id == scenario.zone_id)
+        select(PlanningZone).where(PlanningZone.id == scenario.zone_id)
     )
     zone = zone_result.scalar_one_or_none()
     if zone is None:
         raise HTTPException(status_code=404, detail="Related zone not found")
 
-    # Build a bbox from the zone's geojson for the climate query
-    coords = zone.geojson.get("coordinates", [[]])[0]
-    if not coords:
-        raise HTTPException(status_code=400, detail="Zone has no coordinates")
-
-    lons = [c[0] for c in coords]
-    lats = [c[1] for c in coords]
+    # Build a bbox from the zone's geometry for the climate query
+    from geoalchemy2.shape import to_shape
+    shapely_geom = to_shape(zone.geom)
+    bounds = shapely_geom.bounds  # (minx, miny, maxx, maxy)
     zone_bbox = {
-        "west": min(lons),
-        "south": min(lats),
-        "east": max(lons),
-        "north": max(lats),
+        "west": bounds[0],
+        "south": bounds[1],
+        "east": bounds[2],
+        "north": bounds[3],
     }
 
     try:
         # Fetch climate data for the zone
         observations = await get_snapshot(db, zone_bbox, dataset=None, limit=500)
 
-        grid_data = [
-            {
-                "lat": obs.lat,
-                "lon": obs.lon,
-                "properties": obs.properties,
-            }
-            for obs in observations
-        ]
+        grid_data = []
+        for obs in observations:
+            shapely_point = to_shape(obs.geom)
+            grid_data.append({
+                "lat": shapely_point.y,
+                "lon": shapely_point.x,
+                "properties": obs.properties or {},
+            })
 
         # Call HF Space
         inference_response = await inference_client.predict(

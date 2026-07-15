@@ -20,8 +20,8 @@ class ConnectionManager:
             self.active_connections.remove(websocket)
             logger.info("WebSocket disconnected.")
 
-    async def broadcast_result(self, scenario_id: str, payload: dict):
-        message = json.dumps({"scenario_id": scenario_id, "data": payload})
+    async def broadcast_result(self, payload: dict):
+        message = json.dumps(payload)
         for connection in self.active_connections:
             try:
                 await connection.send_text(message)

@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "../.env", "../infra/.env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
     ]
 
     # ── Server ───────────────────────────────────────────────────────────
@@ -72,7 +74,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "CivicTwin API"
     VERSION: str = "0.1.0"
     PILOT_CITY: str = "Hyderabad"
-    PILOT_BBOX: dict = {
+    PILOT_BBOX: dict[str, float] = {
         "west": 78.2,
         "south": 17.2,
         "east": 78.7,

@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
 export interface ScenarioParams {
-  greenSpaceAdded: number;
-  albedoChange: number;
-  trafficReduction: number;
+  tempAnomaly: number;       // Temperature anomaly: -1.0 to +4.5 °C
+  rainfallAnomaly: number;   // Monsoon rainfall anomaly: -50% to +50%
+  sectorFocus: 'agriculture' | 'water_security' | 'disaster_risk';
 }
 
 export interface SimulationResult {
@@ -12,30 +12,45 @@ export interface SimulationResult {
   aqiImprovement: number;
 }
 
+export interface OverallMetrics {
+  cropYield: number;
+  reservoirLevel: number;
+  droughtIndex: string;
+  tempMean: number;
+}
+
 interface AppState {
   interventionType: string;
   params: ScenarioParams;
   activeZone: string | null;
   simulationResults: SimulationResult[];
-  overallMetrics: { tempDrop: number; aqiImp: number };
+  overallMetrics: OverallMetrics;
+  zones: any[];
+  observations: any[];
   setInterventionType: (type: string) => void;
   setParams: (params: Partial<ScenarioParams>) => void;
   setActiveZone: (zone: string | null) => void;
-  setSimulationResults: (results: SimulationResult[], metrics: { tempDrop: number; aqiImp: number }) => void;
+  setSimulationResults: (results: SimulationResult[], metrics: OverallMetrics) => void;
+  setZones: (zones: any[]) => void;
+  setObservations: (observations: any[]) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  interventionType: 'green_roofs',
+  interventionType: 'agriculture',
   params: {
-    greenSpaceAdded: 10,
-    albedoChange: 0.1,
-    trafficReduction: 5,
+    tempAnomaly: 1.5,
+    rainfallAnomaly: -10,
+    sectorFocus: 'agriculture',
   },
   activeZone: null,
   simulationResults: [],
-  overallMetrics: { tempDrop: 0, aqiImp: 0 },
+  overallMetrics: { cropYield: 0, reservoirLevel: 80, droughtIndex: 'Normal', tempMean: 32.5 },
+  zones: [],
+  observations: [],
   setInterventionType: (type) => set({ interventionType: type }),
   setParams: (newParams) => set((state) => ({ params: { ...state.params, ...newParams } })),
   setActiveZone: (zone) => set({ activeZone: zone }),
   setSimulationResults: (results, metrics) => set({ simulationResults: results, overallMetrics: metrics }),
+  setZones: (zones) => set({ zones }),
+  setObservations: (observations) => set({ observations }),
 }));

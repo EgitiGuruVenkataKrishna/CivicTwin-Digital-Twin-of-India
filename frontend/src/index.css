@@ -12,7 +12,7 @@
 
 /* Glassmorphism utility */
 .glass-panel {
-  @apply bg-surface backdrop-blur-md border border-border shadow-xl rounded-xl;
+  @apply bg-surface backdrop-blur-md border border-white/10 shadow-xl rounded-xl;
 }
 
 /* Custom scrollbar for dark mode */

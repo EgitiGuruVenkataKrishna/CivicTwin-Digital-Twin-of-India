@@ -1,5 +1,10 @@
 import logging
+import os
+import sys
 from datetime import datetime
+
+# Add backend directory to path to allow importing civictwin_backend
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend")))
 
 from civictwin_backend.database import async_session
 from civictwin_backend.models.climate import ClimateObservation
