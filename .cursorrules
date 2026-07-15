@@ -1,0 +1,129 @@
+# ============================================================================
+# CivicTwin — AI Coding Rules
+# Bharatiya Antariksh Hackathon 2026
+# Team: CivicTwin | Leader: Guru Venkata Krishna Egiti, VIT-AP University
+# Pilot City: Hyderabad
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# 1. ARCHITECTURE — DECOUPLED, ZERO-COST FREE TIERS
+# ----------------------------------------------------------------------------
+# Frontend : React + Deck.gl + MapLibre GL JS → deployed on Vercel (free tier)
+# Backend  : FastAPI (async) → deployed on Render (free tier)
+# ML Infer : Dockerised FastAPI + TorchScript → Hugging Face Spaces (free tier)
+# Database : Supabase PostgreSQL + PostGIS (free tier, 500 MB limit)
+#
+# Rule: The frontend NEVER bundles PyTorch, TensorFlow, or any heavy ML lib.
+# Rule: The backend NEVER imports torch. It proxies inference requests to
+#       the Hugging Face Space endpoint via httpx (async).
+# Rule: All PINN / ML code lives exclusively in the `ml/` directory.
+# Rule: Export trained models as TorchScript (.pt) for HF Space deployment.
+
+# ----------------------------------------------------------------------------
+# 2. FREE-TIER CONSTRAINTS — ALWAYS RESPECT
+# ----------------------------------------------------------------------------
+# Supabase : 500 MB storage, 2 GB bandwidth/month, 50k auth MAU
+# Vercel   : No serverless functions in free tier; frontend is static SPA only
+# HF Spaces: 2 vCPU, 16 GB RAM, no GPU on free tier
+# Render   : 750 hrs/month free, sleeps after 15 min inactivity
+#
+# Rule: Never store large rasters in Supabase. Use COG on external storage.
+# Rule: Keep Docker images lean — multi-stage builds, slim base images.
+
+# ----------------------------------------------------------------------------
+# 3. BACKEND — FastAPI on Render
+# ----------------------------------------------------------------------------
+# Language  : Python 3.11+
+# Framework : FastAPI with async/await throughout (no sync endpoints)
+# ORM       : SQLAlchemy 2.0+ async sessions with GeoAlchemy2 for PostGIS
+# HTTP      : httpx (async) — prefer over requests in all cases
+# Settings  : pydantic-settings (BaseSettings). NEVER hardcode secrets or URLs.
+# Migrations: Alembic for schema evolution
+# Linting   : Ruff (format + lint)
+#
+# Rule: NEVER use raw SQL strings in Python. All queries go through
+#       SQLAlchemy ORM / Core with GeoAlchemy2 spatial functions.
+# Rule: PostGIS spatial queries MUST use ST_* functions via GeoAlchemy2
+#       (e.g., ST_Within, ST_DWithin, ST_Transform, ST_Area).
+# Rule: API versioning — all routes under /api/v1/ prefix.
+# Rule: CORS — allow Vercel production domain AND http://localhost:5173.
+# Rule: Use gradio_client or httpx to call the HF Space inference endpoint.
+# Rule: ETL scripts live in `etl/` and share the backend Python environment.
+
+# ----------------------------------------------------------------------------
+# 4. FRONTEND — React on Vercel
+# ----------------------------------------------------------------------------
+# Runtime   : Node 20+, TypeScript strict mode (strict: true in tsconfig)
+# State     : Zustand (no Redux, no Context API for global state)
+# HTTP      : Axios with interceptors for auth & error handling
+# Map       : Deck.gl + MapLibre GL JS (open-source, no Mapbox token needed)
+# Styling   : Tailwind CSS or CSS Modules — no inline styles in components
+# Linting   : ESLint + Prettier
+# Build     : Vite
+#
+# Rule: The frontend is a STATIC SPA. No server-side rendering, no API routes.
+# Rule: All data fetching goes through the FastAPI backend, never direct DB.
+# Rule: Map tiles via free providers (Carto, Stadia, OpenFreeMap).
+
+# ----------------------------------------------------------------------------
+# 5. ML / PINN — Hugging Face Spaces
+# ----------------------------------------------------------------------------
+# Location  : All model code in `ml/` directory only
+# Framework : PyTorch (TorchScript for serving)
+# Serving   : Dockerised FastAPI app deployed as HF Space (Docker SDK)
+# Export    : torch.jit.script or torch.jit.trace → .pt files
+#
+# Rule: NEVER import torch outside of `ml/` or the HF Space container.
+# Rule: Model artifacts (.pt files) are stored in the HF Space repo, not in
+#       the backend or Supabase.
+# Rule: The backend calls the HF Space via its public URL using httpx.
+
+# ----------------------------------------------------------------------------
+# 6. DATABASE — Supabase PostGIS
+# ----------------------------------------------------------------------------
+# Engine    : PostgreSQL 15+ with PostGIS extension
+# ORM layer : SQLAlchemy 2.0 + GeoAlchemy2
+# Async     : asyncpg driver for async sessions
+# Migrations: SQL files in `infra/supabase/migrations/`
+#
+# Rule: Enable PostGIS extension before creating spatial tables.
+# Rule: All geometry columns MUST have SRID 4326 (WGS 84).
+# Rule: Create GIST indices on every geometry column.
+# Rule: Use gen_random_uuid() for UUID primary key defaults.
+# Rule: JSONB for flexible properties — validate shape in application layer.
+
+# ----------------------------------------------------------------------------
+# 7. DATA FORMATS
+# ----------------------------------------------------------------------------
+# Rasters : Cloud-Optimised GeoTIFF (COG) — rio-cogeo for conversion
+# Vectors : GeoJSON (RFC 7946) for API responses
+# Internal: WKB via GeoAlchemy2 for DB storage
+#
+# Rule: Never store raw GeoTIFF blobs in Supabase. Reference external URLs.
+
+# ----------------------------------------------------------------------------
+# 8. CI/CD — GitHub Actions
+# ----------------------------------------------------------------------------
+# Python CI : Ruff lint + pytest on every PR
+# TS CI     : ESLint + vitest on every PR
+# Deploy    : Auto-deploy frontend to Vercel via GitHub integration
+# Deploy    : Auto-deploy backend to Render via GitHub integration
+# Deploy    : Auto-deploy ML space to HF via `huggingface_hub` CLI
+#
+# Rule: All secrets in GitHub Actions secrets, never in code or .env committed.
+# Rule: .env files are .gitignored. Use .env.example as a template.
+
+# ----------------------------------------------------------------------------
+# 9. PROJECT STRUCTURE (reference)
+# ----------------------------------------------------------------------------
+# civictwin/
+# ├── frontend/          # React + Deck.gl (Vercel)
+# ├── backend/           # FastAPI (Render)
+# ├── ml/                # PINN models + TorchScript export
+# ├── etl/               # Data ingestion scripts (shared backend env)
+# ├── infra/             # Supabase migrations, Docker, IaC
+# │   └── supabase/
+# │       └── migrations/
+# ├── .github/workflows/ # CI/CD
+# ├── .cursorrules       # This file
+# └── pyproject.toml     # Python project metadata

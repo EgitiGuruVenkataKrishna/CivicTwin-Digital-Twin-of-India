@@ -1,0 +1,23 @@
+# ==========================================================================
+# CivicTwin ETL — Python Dependencies
+# Data ingestion pipeline for satellite + ground-station climate data.
+# ==========================================================================
+
+# --- Google Earth Engine ---
+earthengine-api>=1.4,<2.0
+
+# --- Raster Processing ---
+rioxarray>=0.17,<1.0
+xarray>=2024.1,<2026.0
+
+# --- Geospatial ---
+shapely>=2.0,<3.0
+geoalchemy2>=0.15,<1.0
+
+# --- Database ---
+sqlalchemy>=2.0,<3.0
+asyncpg>=0.30,<1.0
+psycopg2-binary>=2.9,<3.0
+
+# --- Environment ---
+python-dotenv>=1.0,<2.0

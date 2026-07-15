@@ -1,0 +1,100 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+.venv/
+venv/
+env/
+.python-version
+*.pth
+
+# Poetry
+poetry.lock
+
+# ========================
+# Node / Frontend
+# ========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+frontend/dist/
+frontend/build/
+
+# ========================
+# IDE & Editors
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ========================
+# Environment & Secrets
+# ========================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+
+# ========================
+# ML / Data
+# ========================
+*.pt
+*.pth
+*.onnx
+*.torchscript
+checkpoints/
+wandb/
+mlruns/
+data/raw/
+data/processed/
+*.hdf5
+*.h5
+*.nc
+*.tif
+*.tiff
+
+# ========================
+# Misc
+# ========================
+*.log
+*.pid
+*.seed
+coverage/
+.nyc_output/
+htmlcov/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

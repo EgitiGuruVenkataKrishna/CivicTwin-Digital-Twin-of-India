@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "civictwin-backend"
+version = "0.1.0"
+description = "CivicTwin FastAPI backend — REST API for climate data, scenarios, and PINN inference proxy"
+authors = ["CivicTwin Contributors"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "civictwin_backend" },
+    { include = "etl", from = ".." },
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115"
+uvicorn = { version = "^0.34", extras = ["standard"] }
+sqlalchemy = "^2.0"
+geoalchemy2 = "^0.15"
+psycopg2-binary = "^2.9"
+pydantic = "^2.0"
+pydantic-settings = "^2.0"
+httpx = "^0.28"
+redis = "^5.0"
+gradio-client = "^1.5"
+python-dotenv = "^1.0"
+geojson = "^3.1"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8"
+mypy = "^1.13"
+pytest = "^8.0"
+pytest-asyncio = "^0.24"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
